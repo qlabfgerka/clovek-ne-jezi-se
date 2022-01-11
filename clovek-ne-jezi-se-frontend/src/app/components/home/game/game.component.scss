@@ -1,0 +1,34 @@
+.flexbox {
+  width: calc(100% - 2rem);
+  padding: 1rem;
+}
+
+.center {
+  display: flex;
+  justify-content: center;
+  align-content: center;
+  flex: 0.5;
+  flex-wrap: wrap;
+}
+
+.high {
+  height: 100%;
+}
+
+.button {
+  width: 7rem;
+}
+
+.dice {
+  height: 7rem;
+  width: 7rem;
+  background-color: #fafafa;
+  font-size: 5rem;
+  color: black;
+  border: 1px solid black;
+}
+
+.break {
+  flex-basis: 100%;
+  height: 0;
+}

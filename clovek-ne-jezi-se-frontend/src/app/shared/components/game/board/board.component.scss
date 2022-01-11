@@ -1,0 +1,50 @@
+.tile {
+  width: 4rem;
+  height: 4rem;
+  display: flex;
+  align-items: center;
+}
+
+.tile:not(.board) {
+  border: 1px solid #303030;
+}
+
+.board {
+  border: 1px solid black;
+  background-color: #fafafa;
+}
+
+.padding {
+  padding-top: 1rem;
+}
+
+.circle {
+  width: 3rem;
+  height: 3rem;
+  border-radius: 50%;
+  margin: 0 auto;
+}
+
+.piece {
+  width: 2rem;
+  height: 2rem;
+  margin: 0 auto;
+  filter: brightness(50%);
+  border: 3px solid black;
+}
+
+.p1 {
+  background-color: #172a3a;
+}
+
+.p2 {
+  background-color: #81c3d7;
+}
+
+.p3 {
+  background-color: #ff5154;
+}
+
+.p4 {
+  background-color: #59ffa0;
+}
