@@ -2,8 +2,10 @@ import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
 import { AuthModule } from './controllers/user/auth/auth.module';
-import { DtoFunctionsService } from './services/dto-functions/dto-functions.service';
 import { DtoFunctionsModule } from './services/dto-functions/dto-functions.module';
+import { RoomGateway } from './gateways/room.gateway';
+import { SocketModule } from './services/socket/socket.module';
+import { RoomModule } from './controllers/room/room.module';
 
 @Module({
   imports: [
@@ -17,8 +19,10 @@ import { DtoFunctionsModule } from './services/dto-functions/dto-functions.modul
     }),
     AuthModule,
     DtoFunctionsModule,
+    SocketModule,
+    RoomModule,
   ],
   controllers: [],
-  providers: [],
+  providers: [RoomGateway],
 })
 export class AppModule {}

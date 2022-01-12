@@ -1,6 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { take } from 'rxjs';
+import { RoomService } from 'src/app/services/room/room.service';
+import { SocketService } from 'src/app/services/socket/socket.service';
 import { AuthService } from 'src/app/services/user/auth/auth.service';
 
 @Component({
@@ -11,16 +13,19 @@ import { AuthService } from 'src/app/services/user/auth/auth.service';
 export class HeaderComponent implements OnInit {
   constructor(
     private readonly authService: AuthService,
+    private readonly socketService: SocketService,
+    private readonly roomService: RoomService,
     private readonly router: Router
   ) {}
 
   ngOnInit(): void {}
-  
+
   public get isLoggedIn(): boolean {
     return this.authService.isLoggedIn;
   }
 
   public logout(): void {
+    this.leaveRoom();
     this.authService
       .logout()
       .pipe(take(1))
@@ -31,7 +36,17 @@ export class HeaderComponent implements OnInit {
       });
   }
 
+  public leaveRoom(): void {
+    this.roomService
+      .leaveRooms()
+      .pipe(take(1))
+      .subscribe(() => {
+        this.socketService.stopListening();
+      });
+  }
+
   public openProfile(): void {
+    this.leaveRoom();
     this.router.navigate([`profile/${this.getUserID}`]);
   }
 

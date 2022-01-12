@@ -28,6 +28,8 @@
     "@nestjs/mongoose": "^9.0.2",
     "@nestjs/passport": "^8.0.1",
     "@nestjs/platform-express": "^8.0.0",
+    "@nestjs/platform-socket.io": "^8.2.5",
+    "@nestjs/websockets": "^8.2.5",
     "bcrypt": "^5.0.1",
     "mongoose": "^6.1.6",
     "nanoid": "^3.1.31",
