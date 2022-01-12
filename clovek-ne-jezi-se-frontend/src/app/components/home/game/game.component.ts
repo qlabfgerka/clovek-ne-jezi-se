@@ -27,7 +27,36 @@ export class GameComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    this.socketService.socket.on(
+      'rolled',
+      (data: { room: RoomDTO }) => (this.room = data.room)
+    );
+
     this.refreshRoom();
+  }
+
+  public get getUserID(): string {
+    return this.authService.getUserID();
+  }
+
+  public get turn(): boolean {
+    return (
+      this.room.playerList?.indexOf(
+        this.room.playerList.find(
+          (player: PlayerDTO) => player.player?.id === this.getUserID
+        ) as PlayerDTO
+      ) === this.room.turn
+    );
+  }
+
+  public rollDice(): void {
+    console.log(this.room);
+    this.roomService
+      .rollDice(this.room.id!)
+      .pipe(take(1))
+      .subscribe((room: RoomDTO) => {
+        this.room = room;
+      });
   }
 
   private refreshRoom(): void {

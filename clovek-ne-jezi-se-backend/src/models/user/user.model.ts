@@ -41,6 +41,9 @@ export class Player {
 
   @Prop()
   finished: boolean;
+
+  @Prop()
+  roll: number;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

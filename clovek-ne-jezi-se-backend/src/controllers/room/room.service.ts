@@ -31,6 +31,7 @@ export class RoomService {
     const player: Player = {
       finished: false,
       player: admin._id,
+      roll: -1,
     };
 
     const newRoom = new this.roomModel({
@@ -73,6 +74,7 @@ export class RoomService {
     const player: Player = {
       finished: false,
       player: user._id,
+      roll: -1,
     };
 
     if (room.password && !(await bcrypt.compare(password, room.password)))
@@ -146,6 +148,34 @@ export class RoomService {
 
     room.markModified('playerList');
     await room.save();
+
+    return await this.dtoFunctions.roomToDTO(room);
+  }
+
+  public async rollDice(roomId: string, userId: string): Promise<Room> {
+    const room = await this.roomModel.findById(roomId);
+    const user = await this.userModel.findById(userId);
+
+    const index = room.playerList.indexOf(
+      room.playerList.find(
+        (player: Player) => user.id === player.player.toString(),
+      ),
+    );
+
+    if (index > -1) {
+      room.playerList[index].roll = this.randomIntFromInterval(1, 6);
+      ++room.turn;
+
+      if (!room.playerList.find((player: Player) => player.roll === -1)) {
+        room.playerList.sort((player1: Player, player2: Player) =>
+          player1.roll > player2.roll ? -1 : 1,
+        );
+        room.turn = 0;
+      }
+
+      room.markModified('playerList');
+      await room.save();
+    }
 
     return await this.dtoFunctions.roomToDTO(room);
   }
@@ -237,5 +267,9 @@ export class RoomService {
     const hash = await bcrypt.hash(password, salt);
 
     return hash;
+  }
+
+  private randomIntFromInterval(min: number, max: number) {
+    return Math.floor(Math.random() * (max - min + 1) + min);
   }
 }

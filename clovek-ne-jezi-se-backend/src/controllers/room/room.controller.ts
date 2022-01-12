@@ -148,6 +148,19 @@ export class RoomController {
     return result;
   }
 
+  @UseGuards(JwtAuthGuard)
+  @Patch('roll/:id')
+  public async rollDice(
+    @Param('id') roomId: string,
+    @Request() req: any,
+  ): Promise<Room> {
+    const room = await this.roomService.rollDice(roomId, req.user.id);
+
+    this.socketService.server.to(roomId).emit('rolled', { room });
+
+    return room;
+  }
+
   /*@UseGuards(JwtAuthGuard)
   @Patch('guess/:id')
   public async guess(

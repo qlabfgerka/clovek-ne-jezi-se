@@ -33,6 +33,15 @@
       <div class="center high">6</div>
     </div>
     <div class="break"></div>
-    <button mat-raised-button color="accent" class="button">ROLL</button>
+    <button
+      mat-raised-button
+      color="accent"
+      class="button"
+      *ngIf="room"
+      [disabled]="!turn"
+      (click)="rollDice()"
+    >
+      ROLL
+    </button>
   </div>
 </div>

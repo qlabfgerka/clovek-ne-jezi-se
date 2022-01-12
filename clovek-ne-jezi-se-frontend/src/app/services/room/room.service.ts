@@ -8,7 +8,7 @@ import { UserDTO } from 'src/app/models/user/user.model';
   providedIn: 'root',
 })
 export class RoomService {
-    private readonly hostname: string = 'http://localhost:3000';
+  private readonly hostname: string = 'http://localhost:3000';
 
   constructor(private readonly httpClient: HttpClient) {}
 
@@ -63,6 +63,13 @@ export class RoomService {
   public startGame(roomId: string): Observable<boolean> {
     return this.httpClient.patch<boolean>(
       `${this.hostname}/room/start/${roomId}`,
+      {}
+    );
+  }
+
+  public rollDice(roomId: string): Observable<RoomDTO> {
+    return this.httpClient.patch<RoomDTO>(
+      `${this.hostname}/room/roll/${roomId}`,
       {}
     );
   }
