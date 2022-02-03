@@ -43,6 +43,14 @@ export class GameComponent implements OnInit {
     return this.authService.getUserID();
   }
 
+  public get playerNumber(): number {
+    return this.room.playerList?.indexOf(
+      this.room.playerList.find(
+        (player: PlayerDTO) => player.player?.id === this.getUserID
+      ) as PlayerDTO
+    ) as number + 1;
+  }
+
   public get turn(): boolean {
     return (
       this.room.playerList?.indexOf(
