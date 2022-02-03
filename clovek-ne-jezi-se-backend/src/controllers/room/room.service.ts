@@ -5,6 +5,7 @@ import { Room, RoomDocument } from 'src/models/room/room.model';
 import { Player, User, UserDocument } from 'src/models/user/user.model';
 import { DtoFunctionsService } from 'src/services/dto-functions/dto-functions.service';
 import * as bcrypt from 'bcrypt';
+import { RoomRoll } from 'src/models/room/room.roll.model';
 
 @Injectable()
 export class RoomService {
@@ -40,6 +41,7 @@ export class RoomService {
       password: await this.generateHash(room.password),
       playerList: [player],
       turn: -1,
+      sorted: false,
     });
 
     await newRoom.save();
@@ -132,7 +134,6 @@ export class RoomService {
 
   public async startGame(roomId: string, userId: string): Promise<Room> {
     const room = await this.roomModel.findById(roomId);
-    const user = await this.userModel.findById(userId);
 
     room.turn = 0;
     for (let i = 0; i < room.playerList.length; i++) {
@@ -152,7 +153,7 @@ export class RoomService {
     return await this.dtoFunctions.roomToDTO(room);
   }
 
-  public async rollDice(roomId: string, userId: string): Promise<Room> {
+  public async rollDice(roomId: string, userId: string): Promise<RoomRoll> {
     const room = await this.roomModel.findById(roomId);
     const user = await this.userModel.findById(userId);
 
@@ -165,19 +166,27 @@ export class RoomService {
     if (index > -1) {
       room.playerList[index].roll = this.randomIntFromInterval(1, 6);
       ++room.turn;
+      room.turn = room.turn % room.playerList.length;
 
-      if (!room.playerList.find((player: Player) => player.roll === -1)) {
+      if (
+        !room.playerList.find((player: Player) => player.roll === -1) &&
+        !room.sorted
+      ) {
         room.playerList.sort((player1: Player, player2: Player) =>
           player1.roll > player2.roll ? -1 : 1,
         );
         room.turn = 0;
+        room.sorted = true;
       }
 
       room.markModified('playerList');
       await room.save();
     }
 
-    return await this.dtoFunctions.roomToDTO(room);
+    return this.dtoFunctions.roomRollToDto(
+      await this.dtoFunctions.roomToDTO(room),
+      room.playerList[index].roll,
+    );
   }
 
   /*public async guess(

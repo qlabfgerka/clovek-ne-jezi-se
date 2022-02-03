@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Room } from 'src/models/room/room.model';
+import { RoomRoll } from 'src/models/room/room.roll.model';
 import { Player, User, UserDocument } from 'src/models/user/user.model';
 
 @Injectable()
@@ -63,9 +64,19 @@ export class DtoFunctionsService {
       title: room.title,
       admin: this.userToDTO(await this.getUser(room.admin)),
       turn: room.turn,
+      sorted: room.sorted,
     };
 
     return roomDTO;
+  }
+
+  public roomRollToDto(room: Room, roll: number): RoomRoll {
+    const roomRollDTO: RoomRoll = {
+      roll,
+      room,
+    };
+
+    return roomRollDTO;
   }
 
   public async roomsToDTO(rooms: Array<Room>): Promise<Array<Room>> {

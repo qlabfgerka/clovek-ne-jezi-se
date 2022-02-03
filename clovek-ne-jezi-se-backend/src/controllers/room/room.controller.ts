@@ -154,11 +154,11 @@ export class RoomController {
     @Param('id') roomId: string,
     @Request() req: any,
   ): Promise<Room> {
-    const room = await this.roomService.rollDice(roomId, req.user.id);
+    const roomRoll = await this.roomService.rollDice(roomId, req.user.id);
 
-    this.socketService.server.to(roomId).emit('rolled', { room });
+    this.socketService.server.to(roomId).emit('rolled', { room: roomRoll.room, roll: roomRoll.roll });
 
-    return room;
+    return roomRoll.room;
   }
 
   /*@UseGuards(JwtAuthGuard)

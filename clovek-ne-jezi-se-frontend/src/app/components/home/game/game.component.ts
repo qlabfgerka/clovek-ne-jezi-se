@@ -17,6 +17,7 @@ export class GameComponent implements OnInit {
   public displayedColumns: string[] = ['name'];
   public dataSource!: MatTableDataSource<PlayerDTO>;
   public room!: RoomDTO;
+  public roll: number = 0;
 
   constructor(
     private readonly route: ActivatedRoute,
@@ -29,7 +30,10 @@ export class GameComponent implements OnInit {
   ngOnInit(): void {
     this.socketService.socket.on(
       'rolled',
-      (data: { room: RoomDTO }) => (this.room = data.room)
+      (data: { room: RoomDTO; roll: number }) => {
+        this.room = data.room;
+        this.roll = data.roll;
+      }
     );
 
     this.refreshRoom();
