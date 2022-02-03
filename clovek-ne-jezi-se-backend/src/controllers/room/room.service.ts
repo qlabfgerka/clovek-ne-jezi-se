@@ -153,6 +153,16 @@ export class RoomService {
     return await this.dtoFunctions.roomToDTO(room);
   }
 
+  public async updateTurn(roomId: string): Promise<Room> {
+    const room = await this.roomModel.findById(roomId);
+
+    ++room.turn;
+    room.turn = room.turn % room.playerList.length;
+    await room.save();
+
+    return await this.dtoFunctions.roomToDTO(room);
+  }
+
   public async rollDice(roomId: string, userId: string): Promise<RoomRoll> {
     const room = await this.roomModel.findById(roomId);
     const user = await this.userModel.findById(userId);
@@ -165,18 +175,18 @@ export class RoomService {
 
     if (index > -1) {
       room.playerList[index].roll = this.randomIntFromInterval(1, 6);
-      ++room.turn;
-      room.turn = room.turn % room.playerList.length;
 
-      if (
-        !room.playerList.find((player: Player) => player.roll === -1) &&
-        !room.sorted
-      ) {
-        room.playerList.sort((player1: Player, player2: Player) =>
-          player1.roll > player2.roll ? -1 : 1,
-        );
-        room.turn = 0;
-        room.sorted = true;
+      if (!room.sorted) {
+        ++room.turn;
+        room.turn = room.turn % room.playerList.length;
+
+        if (!room.playerList.find((player: Player) => player.roll === -1)) {
+          room.playerList.sort((player1: Player, player2: Player) =>
+            player1.roll > player2.roll ? -1 : 1,
+          );
+          room.turn = 0;
+          room.sorted = true;
+        }
       }
 
       room.markModified('playerList');

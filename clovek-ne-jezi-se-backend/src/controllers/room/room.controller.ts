@@ -156,9 +156,23 @@ export class RoomController {
   ): Promise<Room> {
     const roomRoll = await this.roomService.rollDice(roomId, req.user.id);
 
-    this.socketService.server.to(roomId).emit('rolled', { room: roomRoll.room, roll: roomRoll.roll });
+    this.socketService.server
+      .to(roomId)
+      .emit('rolled', { room: roomRoll.room, roll: roomRoll.roll });
 
     return roomRoll.room;
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Patch('updateTurn/:id')
+  public async updateTurn(@Param('id') roomId: string): Promise<Room> {
+    const room = await this.roomService.updateTurn(roomId);
+
+    this.socketService.server
+      .to(roomId)
+      .emit('rolled', { room: room, roll: 0 });
+
+    return room;
   }
 
   /*@UseGuards(JwtAuthGuard)

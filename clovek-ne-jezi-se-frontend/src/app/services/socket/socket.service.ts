@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { ElementRef, Injectable } from '@angular/core';
 import { io, Socket } from 'socket.io-client';
 
 @Injectable({
@@ -23,12 +23,13 @@ export class SocketService {
     this.socket.emit('kick', { roomId, userId });
   }
 
-  public updateDrawing(roomId: string, drawing: string, seconds: number): void {
-    this.socket.emit('draw', { roomId, drawing, seconds });
-  }
-
-  public getLetter(roomId: string, word: string, index: number): void {
-    this.socket.emit('help', { roomId, word, index });
+  public updateBoard(
+    roomId: string,
+    child: string,
+    oldParent: string,
+    newParent: string
+  ): void {
+    this.socket.emit('board', { roomId, child, oldParent, newParent });
   }
 
   public stopListening(): void {
@@ -43,5 +44,6 @@ export class SocketService {
     this.socket.off('gameOver');
     this.socket.off('wrong');
     this.socket.off('getHelp');
+    this.socket.off('rolled');
   }
 }

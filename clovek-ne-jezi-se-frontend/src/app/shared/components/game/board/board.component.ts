@@ -1,4 +1,5 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, EventEmitter, OnInit, Output } from '@angular/core';
+import { DataService } from 'src/app/services/data/data.service';
 
 @Component({
   selector: 'app-board',
@@ -6,9 +7,20 @@ import { Component, OnInit } from '@angular/core';
   styleUrls: ['./board.component.scss'],
 })
 export class BoardComponent implements OnInit {
-  constructor() {}
+  @Output() moveEvent = new EventEmitter<void>();
+
+  constructor(private readonly dataService: DataService) {}
 
   ngOnInit(): void {}
+
+  public update(child: string, oldParent: string, newParent: string): void {
+    const childDiv = document.getElementsByClassName(child)[0];
+    const oldParentDiv = document.getElementsByClassName(oldParent)[0];
+    const newParentDiv = document.getElementsByClassName(newParent)[0];
+
+    oldParentDiv.removeChild(childDiv);
+    newParentDiv.appendChild(childDiv);
+  }
 
   public move(event: any): void {
     let div: Element;
@@ -18,6 +30,15 @@ export class BoardComponent implements OnInit {
       event.target.parentNode.className.split(' ');
     const childClasses: Array<string> = event.target.className.split(' ');
 
+    const turn: number = this.dataService.getTurn();
+    const roll: number = this.dataService.getRoll();
+    const player: string = this.dataService.getPlayer();
+
+    if (+player[1] - 1 !== turn || !childClasses.includes(player)) return;
+
+    this.dataService.setChild(event.target.className);
+    this.dataService.setOldParent(event.target.parentNode.className);
+
     parent.removeChild(child);
 
     if (
@@ -26,9 +47,16 @@ export class BoardComponent implements OnInit {
       parentClasses.includes('s3') ||
       parentClasses.includes('s4')
     ) {
+      if (roll !== 6) {
+        parent.appendChild(child);
+        return;
+      }
       div = document.getElementsByClassName(
         `tile board ${this.getStartPosition(parentClasses[2])}`
       )[0];
+      this.dataService.setNewParent(
+        `tile board ${this.getStartPosition(parentClasses[2])}`
+      );
       div.appendChild(child);
     } else if (
       parentClasses.includes(`${childClasses[1]}w1`) ||
@@ -39,16 +67,32 @@ export class BoardComponent implements OnInit {
       if (this.moveHome(childClasses[1], +parentClasses[2][3], 1) === '')
         return;
       div = document.getElementsByClassName(
-        `tile board ${this.moveHome(childClasses[1], +parentClasses[2][3], 1)}`
+        `tile board ${this.moveHome(
+          childClasses[1],
+          +parentClasses[2][3],
+          roll
+        )}`
       )[0];
+      this.dataService.setNewParent(
+        `tile board ${this.moveHome(
+          childClasses[1],
+          +parentClasses[2][3],
+          roll
+        )}`
+      );
       div.appendChild(child);
     } else {
       div = document.getElementsByClassName(
-        `tile board ${this.checkHome(childClasses[1], +parentClasses[2], 1)}`
+        `tile board ${this.checkHome(childClasses[1], +parentClasses[2], roll)}`
       )[0];
+      this.dataService.setNewParent(
+        `tile board ${this.checkHome(childClasses[1], +parentClasses[2], roll)}`
+      );
       if (div.children.length > 0) this.reset(childClasses[1], div.children);
       div.appendChild(child);
     }
+
+    this.moveEvent.emit();
   }
 
   private getStartPosition(player: string): number {
