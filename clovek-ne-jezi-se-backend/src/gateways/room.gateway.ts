@@ -101,18 +101,20 @@ export class RoomGateway
       child: string;
       oldParent: string;
       newParent: string;
+      home: string;
+      eaten: string;
+      userId: string;
     },
   ): void {
-    console.log(data.child);
-    console.log(data.oldParent);
-    console.log(data.newParent);
-    this.socketService.server
-      .to(data.roomId)
-      .emit('boardChanged', {
-        child: data.child,
-        oldParent: data.oldParent,
-        newParent: data.newParent,
-      });
+    console.log(data);
+    this.socketService.server.to(data.roomId).emit('boardChanged', {
+      child: data.child,
+      oldParent: data.oldParent,
+      newParent: data.newParent,
+      home: data.home,
+      eaten: data.eaten,
+      userId: data.userId,
+    });
   }
 
   @SubscribeMessage('help')

@@ -51,10 +51,24 @@ export class GameComponent implements OnInit {
 
     this.socketService.socket.on(
       'boardChanged',
-      (data: { child: string; oldParent: string; newParent: string }) => {
-        console.log(data);
-        if (data.child && data.oldParent && data.newParent)
+      (data: {
+        child: string;
+        oldParent: string;
+        newParent: string;
+        home: string;
+        eaten: string;
+        userId: string;
+      }) => {
+        if (
+          data.child &&
+          data.oldParent &&
+          data.newParent &&
+          this.getUserID !== data.userId
+        )
           this.board.update(data.child, data.oldParent, data.newParent);
+
+        if (data.home)
+          this.board.update(data.eaten, data.newParent, data.home);
       }
     );
 
@@ -107,7 +121,10 @@ export class GameComponent implements OnInit {
       this.room.id!,
       this.dataService.getChild(),
       this.dataService.getOldParent(),
-      this.dataService.getNewParent()
+      this.dataService.getNewParent(),
+      this.dataService.getHome(),
+      this.dataService.getEaten(),
+      this.getUserID
     );
 
     this.roomService

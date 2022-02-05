@@ -54,5 +54,14 @@
     >
       END TURN
     </button>
+    <div>
+      <div *ngIf="room && turn && turnEndable && roll">
+        <p>
+          {{ roll === 6 ? "You can move a figure out of home." : "" }}
+        </p>
+        <p>You can move a figure {{ roll }} spaces.</p>
+        <p>You can end your turn.</p>
+      </div>
+    </div>
   </div>
 </div>

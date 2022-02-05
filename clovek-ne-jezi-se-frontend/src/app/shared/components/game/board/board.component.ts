@@ -38,6 +38,8 @@ export class BoardComponent implements OnInit {
 
     this.dataService.setChild(event.target.className);
     this.dataService.setOldParent(event.target.parentNode.className);
+    this.dataService.setHome(undefined);
+    this.dataService.setEaten(undefined);
 
     parent.removeChild(child);
 
@@ -130,6 +132,7 @@ export class BoardComponent implements OnInit {
     if (childClasses.includes('circle') || childClasses.includes(player))
       return;
 
+    this.dataService.setEaten(child.className);
     child.parentNode!.removeChild(child);
     this.sendHome(childClasses[1], child);
   }
@@ -138,8 +141,8 @@ export class BoardComponent implements OnInit {
     const divs = document.getElementsByClassName(`tile board ${player}`);
 
     for (const div of Array.from(divs)) {
-      console.log(div.children.length);
       if (div.children.length === 0) {
+        this.dataService.setHome(div.className);
         div.appendChild(child);
         return;
       }
