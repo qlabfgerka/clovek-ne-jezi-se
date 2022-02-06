@@ -41,6 +41,7 @@ export class DtoFunctionsService {
       player: this.userToDTO(await this.getUser(player.player)),
       finished: player.finished,
       roll: player.roll,
+      pieces: player.pieces,
     };
 
     return playerToDTO;

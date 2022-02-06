@@ -106,7 +106,6 @@ export class RoomGateway
       userId: string;
     },
   ): void {
-    console.log(data);
     this.socketService.server.to(data.roomId).emit('boardChanged', {
       child: data.child,
       oldParent: data.oldParent,

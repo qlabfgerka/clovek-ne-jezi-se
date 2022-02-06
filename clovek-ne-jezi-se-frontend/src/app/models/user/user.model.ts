@@ -12,4 +12,5 @@ export class PlayerDTO {
   id?: string | undefined | null = null;
   player: UserDTO | undefined | null = null;
   finished: boolean | undefined | null = null;
+  pieces: number | undefined | null = null;
 }

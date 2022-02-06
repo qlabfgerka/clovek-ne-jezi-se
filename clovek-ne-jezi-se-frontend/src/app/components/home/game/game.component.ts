@@ -1,4 +1,5 @@
 import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
+import { MatDialog } from '@angular/material/dialog';
 import { MatTableDataSource } from '@angular/material/table';
 import { ActivatedRoute, Router } from '@angular/router';
 import { mergeMap, take } from 'rxjs';
@@ -9,6 +10,7 @@ import { RoomService } from 'src/app/services/room/room.service';
 import { SocketService } from 'src/app/services/socket/socket.service';
 import { AuthService } from 'src/app/services/user/auth/auth.service';
 import { BoardComponent } from 'src/app/shared/components/game/board/board.component';
+import { InformationDialogComponent } from 'src/app/shared/dialogs/information-dialog/information-dialog.component';
 
 @Component({
   selector: 'app-game',
@@ -18,7 +20,7 @@ import { BoardComponent } from 'src/app/shared/components/game/board/board.compo
 export class GameComponent implements OnInit {
   @ViewChild('board') board!: BoardComponent;
 
-  public displayedColumns: string[] = ['name'];
+  public displayedColumns: string[] = ['name', 'pieces'];
   public dataSource!: MatTableDataSource<PlayerDTO>;
   public room!: RoomDTO;
   public roll: number = 0;
@@ -31,10 +33,23 @@ export class GameComponent implements OnInit {
     private readonly roomService: RoomService,
     private readonly authService: AuthService,
     private readonly socketService: SocketService,
-    private readonly dataService: DataService
+    private readonly dataService: DataService,
+    private readonly dialog: MatDialog
   ) {}
 
   ngOnInit(): void {
+    this.socketService.socket.on('finished', (data: { room: RoomDTO }) => {
+      const dialogRef = this.dialog.open(InformationDialogComponent, {
+        data: {
+          information: 'Game over!',
+        },
+      });
+
+      dialogRef.afterClosed().subscribe(() => {
+        this.router.navigate([`lobby/${this.room.id}`]);
+      });
+    });
+
     this.socketService.socket.on(
       'rolled',
       (data: { room: RoomDTO; roll: number }) => {
@@ -59,16 +74,10 @@ export class GameComponent implements OnInit {
         eaten: string;
         userId: string;
       }) => {
-        if (
-          data.child &&
-          data.oldParent &&
-          data.newParent &&
-          this.getUserID !== data.userId
-        )
+        if (data.child && data.oldParent && this.getUserID !== data.userId)
           this.board.update(data.child, data.oldParent, data.newParent);
 
-        if (data.home)
-          this.board.update(data.eaten, data.newParent, data.home);
+        if (data.home) this.board.update(data.eaten, data.newParent, data.home);
       }
     );
 
@@ -116,7 +125,7 @@ export class GameComponent implements OnInit {
       });
   }
 
-  public updateTurn(): void {
+  public updateTurn(home: number): void {
     this.socketService.updateBoard(
       this.room.id!,
       this.dataService.getChild(),
@@ -128,7 +137,7 @@ export class GameComponent implements OnInit {
     );
 
     this.roomService
-      .updateTurn(this.room.id!)
+      .updateTurn(this.room.id!, home)
       .pipe(take(1))
       .subscribe((room: RoomDTO) => {
         this.room = room;

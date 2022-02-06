@@ -14,10 +14,24 @@
         <td
           mat-cell
           *matCellDef="let element"
-          class="auto turn"
+          class="turn center-text"
           [ngClass]="{ turn: element.player.nickname === playerNickname }"
         >
           {{ element.player.nickname }}
+        </td>
+      </ng-container>
+      
+      <ng-container matColumnDef="pieces">
+        <th mat-header-cell *matHeaderCellDef class="center-text">
+          Pieces left
+        </th>
+        <td
+          mat-cell
+          *matCellDef="let element"
+          class="turn center-text"
+          [ngClass]="{ turn: element.player.nickname === playerNickname }"
+        >
+          {{ element.pieces }}
         </td>
       </ng-container>
 
@@ -26,9 +40,11 @@
     </table>
   </div>
 
-  <app-board #board id="board" (moveEvent)="updateTurn()"></app-board>
+  <app-board #board id="board" (moveEvent)="updateTurn($event)"></app-board>
 
   <div class="center">
+    <div class="info"></div>
+    <div class="break"></div>
     <div class="dice">
       <div class="center high">{{ roll }}</div>
     </div>
@@ -50,11 +66,12 @@
       class="button"
       *ngIf="room"
       [disabled]="!turn || !turnEndable"
-      (click)="updateTurn()"
+      (click)="updateTurn(0)"
     >
       END TURN
     </button>
-    <div>
+    <div class="break"></div>
+    <div class="info">
       <div *ngIf="room && turn && turnEndable && roll">
         <p>
           {{ roll === 6 ? "You can move a figure out of home." : "" }}

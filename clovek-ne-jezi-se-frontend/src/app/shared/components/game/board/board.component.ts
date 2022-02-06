@@ -7,19 +7,22 @@ import { DataService } from 'src/app/services/data/data.service';
   styleUrls: ['./board.component.scss'],
 })
 export class BoardComponent implements OnInit {
-  @Output() moveEvent = new EventEmitter<void>();
+  @Output() moveEvent = new EventEmitter<number>();
 
   constructor(private readonly dataService: DataService) {}
 
   ngOnInit(): void {}
 
-  public update(child: string, oldParent: string, newParent: string): void {
+  public update(child: string, oldParent: string, newParent: string | undefined): void {
     const childDiv = document.getElementsByClassName(child)[0];
     const oldParentDiv = document.getElementsByClassName(oldParent)[0];
-    const newParentDiv = document.getElementsByClassName(newParent)[0];
 
     oldParentDiv.removeChild(childDiv);
-    newParentDiv.appendChild(childDiv);
+
+    if (newParent) {
+      const newParentDiv = document.getElementsByClassName(newParent)[0];
+      newParentDiv.appendChild(childDiv);
+    }
   }
 
   public move(event: any): void {
@@ -40,6 +43,7 @@ export class BoardComponent implements OnInit {
     this.dataService.setOldParent(event.target.parentNode.className);
     this.dataService.setHome(undefined);
     this.dataService.setEaten(undefined);
+    this.dataService.setNewParent(undefined);
 
     parent.removeChild(child);
 
@@ -66,8 +70,11 @@ export class BoardComponent implements OnInit {
       parentClasses.includes(`${childClasses[1]}w3`) ||
       parentClasses.includes(`${childClasses[1]}w4`)
     ) {
-      if (this.moveHome(childClasses[1], +parentClasses[2][3], 1) === '')
+      if (this.moveHome(childClasses[1], +parentClasses[2][3], roll) === '') {
+        this.dataService.setNewParent(undefined);
+        this.moveEvent.emit(-1);
         return;
+      }
       div = document.getElementsByClassName(
         `tile board ${this.moveHome(
           childClasses[1],
@@ -94,7 +101,7 @@ export class BoardComponent implements OnInit {
       div.appendChild(child);
     }
 
-    this.moveEvent.emit();
+    this.moveEvent.emit(0);
   }
 
   private getStartPosition(player: string): number {

@@ -40,6 +40,9 @@ export class Player {
   player: User;
 
   @Prop()
+  pieces: number;
+
+  @Prop()
   finished: boolean;
 
   @Prop()

@@ -33,6 +33,7 @@ export class RoomService {
       finished: false,
       player: admin._id,
       roll: -1,
+      pieces: 4,
     };
 
     const newRoom = new this.roomModel({
@@ -77,6 +78,7 @@ export class RoomService {
       finished: false,
       player: user._id,
       roll: -1,
+      pieces: 4,
     };
 
     if (room.password && !(await bcrypt.compare(password, room.password)))
@@ -153,11 +155,50 @@ export class RoomService {
     return await this.dtoFunctions.roomToDTO(room);
   }
 
-  public async updateTurn(roomId: string): Promise<Room> {
+  public async getFinished(roomId: string): Promise<number> {
     const room = await this.roomModel.findById(roomId);
+
+    return room.playerList.filter((player: Player) => player.finished).length;
+  }
+
+  public async updateTurn(
+    roomId: string,
+    home: number,
+    userId: string,
+  ): Promise<Room> {
+    const room = await this.roomModel.findById(roomId);
+    const user = await this.userModel.findById(userId);
 
     ++room.turn;
     room.turn = room.turn % room.playerList.length;
+
+    while (room.playerList[room.turn].finished) {
+      ++room.turn;
+      room.turn = room.turn % room.playerList.length;
+    }
+
+    const index = room.playerList.indexOf(
+      room.playerList.find(
+        (player: Player) => user.id === player.player.toString(),
+      ),
+    );
+
+    if (index > -1 && home === -1) {
+      --room.playerList[index].pieces;
+
+      if (room.playerList[index].pieces === 0) {
+        const position = await this.getFinished(room.id);
+        room.playerList[index].finished = true;
+        user.results[position - 1]
+          ? ++user.results[position - 1]
+          : (user.results[position - 1] = 1);
+
+        await user.save();
+      }
+
+      room.markModified('playerList');
+    }
+
     await room.save();
 
     return await this.dtoFunctions.roomToDTO(room);
@@ -198,86 +239,6 @@ export class RoomService {
       room.playerList[index].roll,
     );
   }
-
-  /*public async guess(
-    roomId: string,
-    userId: string,
-    guess: string,
-    points: number,
-  ): Promise<[number, User]> {
-    const room = await this.roomModel.findById(roomId);
-    const user = await this.userModel.findById(userId);
-    let guessed = 0;
-
-    if (guess.toLowerCase() !== room.currentWord.toLowerCase())
-      return [0, this.dtoFunctions.userToDTO(user)];
-
-    const index = room.playerList.indexOf(
-      room.playerList.find(
-        (player: Player) => user.id === player.player.toString(),
-      ),
-    );
-
-    const drawerIndex = room.playerList.indexOf(
-      room.playerList.find(
-        (player: Player) => room.drawer.toString() === player.player.toString(),
-      ),
-    );
-
-    if (index > -1 && !room.playerList[index].guessed) {
-      const player = await this.userModel.findById(
-        room.playerList[index].player.toString(),
-      );
-      const drawer = await this.userModel.findById(room.drawer.toString());
-      room.playerList[index].points += points;
-      player.cumulativePoints += points;
-      drawer.cumulativePoints += Math.floor(points / 2);
-      room.playerList[index].guessed = true;
-      room.playerList[drawerIndex].points += Math.floor(points / 2);
-
-      room.markModified('playerList');
-      await player.save();
-      await room.save();
-    }
-
-    for (let i = 0; i < room.playerList.length; i++) {
-      if (room.playerList[i].guessed) ++guessed;
-    }
-
-    return [
-      guessed === room.playerList.length - 1 ? 2 : 1,
-      this.dtoFunctions.userToDTO(user),
-    ];
-  }
-
-  public async updateGame(roomId: string): Promise<boolean> {
-    const room = await this.roomModel.findById(roomId);
-    ++room.rounds;
-
-    if (room.rounds === room.playerList.length) {
-      room.drawer = null;
-      room.currentWord = null;
-      room.playerList = room.playerList.sort((a, b) => b.points - a.points);
-      const player = await this.userModel.findById(
-        room.playerList[0].player.toString(),
-      );
-      ++player.wins;
-
-      await player.save();
-      await room.save();
-
-      return false;
-    }
-
-    room.drawer = room.playerList[room.rounds].player;
-    for (let i = 0; i < room.playerList.length; i++) {
-      room.playerList[i].guessed = false;
-    }
-
-    room.markModified('playerList');
-    await room.save();
-    return true;
-  }*/
 
   private async generateHash(password: string): Promise<string> {
     if (password === '') return '';

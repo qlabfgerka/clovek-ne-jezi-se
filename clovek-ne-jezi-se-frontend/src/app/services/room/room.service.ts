@@ -74,10 +74,10 @@ export class RoomService {
     );
   }
 
-  public updateTurn(roomId: string): Observable<RoomDTO> {
+  public updateTurn(roomId: string, home: number): Observable<RoomDTO> {
     return this.httpClient.patch<RoomDTO>(
       `${this.hostname}/room/updateTurn/${roomId}`,
-      {}
+      { home }
     );
   }
 }

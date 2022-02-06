@@ -27,12 +27,20 @@ export class SocketService {
     roomId: string,
     child: string,
     oldParent: string,
-    newParent: string,
+    newParent: string | undefined,
     home: string | undefined,
     eaten: string | undefined,
     userId: string
   ): void {
-    this.socket.emit('board', { roomId, child, oldParent, newParent, home, eaten, userId });
+    this.socket.emit('board', {
+      roomId,
+      child,
+      oldParent,
+      newParent,
+      home,
+      eaten,
+      userId,
+    });
   }
 
   public stopListening(): void {

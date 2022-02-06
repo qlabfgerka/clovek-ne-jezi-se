@@ -9,7 +9,7 @@ export class DataService {
   private roll!: number;
 
   private oldParent!: string;
-  private newParent!: string;
+  private newParent!: string | undefined;
   private child!: string;
   private home: string | undefined;
   private eaten: string | undefined;
@@ -26,7 +26,7 @@ export class DataService {
     this.oldParent = oldParent;
   }
 
-  public setNewParent(newParent: string): void {
+  public setNewParent(newParent: string | undefined): void {
     this.newParent = newParent;
   }
 
@@ -58,7 +58,7 @@ export class DataService {
     return this.oldParent;
   }
 
-  public getNewParent(): string {
+  public getNewParent(): string | undefined {
     return this.newParent;
   }
 

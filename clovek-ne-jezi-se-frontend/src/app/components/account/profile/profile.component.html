@@ -1,1 +1,22 @@
-<p>profile works!</p>
+<div class="flexbox margin-top" *ngIf="!isLoading">
+  <mat-card class="card">
+    <mat-card-header>
+      <mat-card-title>{{ user.nickname }}</mat-card-title>
+      <mat-card-subtitle>{{ user.username }}</mat-card-subtitle>
+    </mat-card-header>
+    <mat-card-content>
+      <div class="flexbox">
+        <h4>Total games played: {{ user.gamesPlayed }}</h4>
+        <div class="break"></div>
+        <h4>First place: {{ user.results![0] ? user.results![0] : 0 }}</h4>
+        <div class="break"></div>
+        <h4>Second place: {{ user.results![1] ? user.results![2] : 0 }}</h4>
+        <div class="break"></div>
+        <h4>Third place: {{ user.results![2] ? user.results![2] : 0 }}</h4>
+        <div class="break"></div>
+        <h4>Fourth place: {{ user.results![3] ? user.results![3] : 0 }}</h4>
+      </div>
+    </mat-card-content>
+  </mat-card>
+  <div class="break"></div>
+</div>
