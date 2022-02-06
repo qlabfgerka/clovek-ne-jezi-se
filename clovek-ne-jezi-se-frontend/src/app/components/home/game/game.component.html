@@ -7,6 +7,25 @@
     >
       <button mat-raised-button color="primary">Primary</button>
 
+      <ng-container matColumnDef="color">
+        <th mat-header-cell *matHeaderCellDef class="center-text">Color</th>
+        <td
+          mat-cell
+          *matCellDef="let element"
+          class="turn center-text"
+          [ngClass]="{
+            shaker: element.finished,
+            normal: playerColor(element) === '/',
+            p1: playerColor(element) === 'Blue',
+            p2: playerColor(element) === 'Green',
+            p3: playerColor(element) === 'Red',
+            p4: playerColor(element) === 'Purple'
+          }"
+        >
+          {{ playerColor(element) }}
+        </td>
+      </ng-container>
+
       <ng-container matColumnDef="name">
         <th mat-header-cell *matHeaderCellDef class="center-text">
           Player name

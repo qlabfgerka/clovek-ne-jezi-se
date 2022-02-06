@@ -13,7 +13,11 @@ export class BoardComponent implements OnInit {
 
   ngOnInit(): void {}
 
-  public update(child: string, oldParent: string, newParent: string | undefined): void {
+  public update(
+    child: string,
+    oldParent: string,
+    newParent: string | undefined
+  ): void {
     const childDiv = document.getElementsByClassName(child)[0];
     const oldParentDiv = document.getElementsByClassName(oldParent)[0];
 
@@ -117,8 +121,10 @@ export class BoardComponent implements OnInit {
       return `${player}w${next % 22}`;
     else if (player === 'p2' && next > 2 && position <= 2)
       return `${player}w${(40 + next) % 42}`;
-    else if (player === 'p2' && next > 2 && next > 40 && position >= 37)
+    else if (player === 'p2' && next > 42 && position <= 39)
       return `${player}w${next % 42}`;
+    else if (player === 'p2' && next <= 42 && position <= 39)
+      return `${player}w${next % 40}`;
     else if (player === 'p3' && next > 32 && position <= 32)
       return `${player}w${next % 32}`;
     else if (player === 'p4' && next > 12 && position <= 12)

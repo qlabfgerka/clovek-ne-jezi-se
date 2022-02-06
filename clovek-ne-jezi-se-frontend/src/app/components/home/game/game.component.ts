@@ -20,7 +20,8 @@ import { InformationDialogComponent } from 'src/app/shared/dialogs/information-d
 export class GameComponent implements OnInit {
   @ViewChild('board') board!: BoardComponent;
 
-  public displayedColumns: string[] = ['name', 'pieces'];
+  public displayedColumns: string[] = ['color', 'name', 'pieces'];
+  public colors: string[] = ['blue', 'green', 'red', 'purple'];
   public dataSource!: MatTableDataSource<PlayerDTO>;
   public room!: RoomDTO;
   public roll: number = 0;
@@ -86,6 +87,22 @@ export class GameComponent implements OnInit {
     );
 
     this.refreshRoom();
+  }
+
+  public playerColor(player: PlayerDTO): string {
+    if (!this.room || !this.room.sorted) return '/';
+
+    const index = this.room.playerList?.indexOf(
+      this.room.playerList.find(
+        (p: PlayerDTO) => player.player?.id === p.player?.id
+      ) as PlayerDTO
+    );
+
+    if (index === 0) return 'Blue';
+    else if (index === 1) return 'Green';
+    else if (index === 2) return 'Red';
+    else if (index === 3) return 'Purple';
+    else return '';
   }
 
   public get getUserID(): string {

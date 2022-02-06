@@ -46,7 +46,7 @@
 }
 
 .turn {
-  color: #69f0ae;
+  color: #e59500;
 }
 
 .info {
@@ -55,6 +55,38 @@
   max-height: 200px;
   width: 200px;
   max-width: 200px;
+}
+
+.p1 {
+  color: #094074;
+}
+
+.p2 {
+  color: #69f0ae;
+}
+
+.p3 {
+  color: #f44336;
+}
+
+.p4 {
+  color: #7b1fa2;
+}
+
+.normal {
+  color: #c7c7c7;
+}
+
+.mat-column-color {
+  border-right: 1px solid #424242;
+  border-bottom: 1px solid #424242;
+  background-color: #595959;
+  padding-right: 1rem;
+  text-align: center;
+}
+
+.mat-column-name {
+  padding-left: 1rem;
 }
 
 @keyframes shake {
