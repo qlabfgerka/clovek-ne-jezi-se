@@ -6,6 +6,7 @@ import { DtoFunctionsModule } from './services/dto-functions/dto-functions.modul
 import { RoomGateway } from './gateways/room.gateway';
 import { SocketModule } from './services/socket/socket.module';
 import { RoomModule } from './controllers/room/room.module';
+import { UserModule } from './controllers/user/user.module';
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { RoomModule } from './controllers/room/room.module';
     DtoFunctionsModule,
     SocketModule,
     RoomModule,
+    UserModule,
   ],
   controllers: [],
   providers: [RoomGateway],

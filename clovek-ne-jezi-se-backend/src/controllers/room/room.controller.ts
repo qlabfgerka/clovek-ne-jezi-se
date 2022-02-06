@@ -148,57 +148,39 @@ export class RoomController {
     return result;
   }
 
-  /*@UseGuards(JwtAuthGuard)
-  @Patch('guess/:id')
-  public async guess(
+  @UseGuards(JwtAuthGuard)
+  @Patch('roll/:id')
+  public async rollDice(
     @Param('id') roomId: string,
     @Request() req: any,
-    @Body('guess') guess: string,
-    @Body('points') points: number,
-  ): Promise<number> {
-    const [result, user] = await this.roomService.guess(
-      roomId,
-      req.user.id,
-      guess,
-      points,
-    );
+  ): Promise<Room> {
+    const roomRoll = await this.roomService.rollDice(roomId, req.user.id);
 
-    if (result == 1) {
-      this.socketService.server.to(roomId).emit('guessed', 'user guessed');
-    } else if (result == 2) {
-      await this.updateGame(roomId);
-    } else {
-      this.socketService.server.to(roomId).emit('wrong', { user, guess });
-    }
+    this.socketService.server
+      .to(roomId)
+      .emit('rolled', { room: roomRoll.room, roll: roomRoll.roll });
 
-    return result;
+    return roomRoll.room;
   }
 
   @UseGuards(JwtAuthGuard)
-  @Patch('updateGame/:id')
-  public async updateGame(@Param('id') roomId: string): Promise<boolean> {
-    const result = await this.roomService.updateGame(roomId);
+  @Patch('updateTurn/:id')
+  public async updateTurn(
+    @Param('id') roomId: string,
+    @Body('home') home: number,
+    @Request() req: any,
+  ): Promise<Room> {
+    const room = await this.roomService.updateTurn(roomId, home, req.user.id);
+    const finished = await this.roomService.getFinished(roomId);
 
-    if (!result) {
-      this.socketService.server.to(roomId).emit('gameOver', false);
-
-      setTimeout(() => {
-        this.socketService.server.to(roomId).emit('gameOver', true);
-      }, 10000);
+    if (finished === room.playerList.length) {
+      this.socketService.server.to(roomId).emit('finished', { room: room });
     } else {
-      this.socketService.server.to(roomId).emit('roundOver', false);
-
-      setTimeout(() => {
-        this.socketService.server
-          .to(roomId)
-          .emit('getReady', 'get ready for drawing');
-      }, 6000);
-
-      setTimeout(() => {
-        this.socketService.server.to(roomId).emit('roundOver', true);
-      }, 11000);
+      this.socketService.server
+        .to(roomId)
+        .emit('rolled', { room: room, roll: 0 });
     }
 
-    return result;
-  }*/
+    return room;
+  }
 }

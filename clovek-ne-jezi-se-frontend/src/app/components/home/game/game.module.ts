@@ -10,6 +10,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatTableModule } from '@angular/material/table';
+import { InformationDialogModule } from 'src/app/shared/dialogs/information-dialog/information-dialog.module';
 
 @NgModule({
   declarations: [GameComponent],
@@ -23,6 +24,7 @@ import { MatTableModule } from '@angular/material/table';
     MatInputModule,
     MatTableModule,
     MatIconModule,
+    InformationDialogModule,
   ],
 })
 export class GameModule {}

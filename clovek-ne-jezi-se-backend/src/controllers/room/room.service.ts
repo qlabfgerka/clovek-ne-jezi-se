@@ -5,6 +5,7 @@ import { Room, RoomDocument } from 'src/models/room/room.model';
 import { Player, User, UserDocument } from 'src/models/user/user.model';
 import { DtoFunctionsService } from 'src/services/dto-functions/dto-functions.service';
 import * as bcrypt from 'bcrypt';
+import { RoomRoll } from 'src/models/room/room.roll.model';
 
 @Injectable()
 export class RoomService {
@@ -31,6 +32,8 @@ export class RoomService {
     const player: Player = {
       finished: false,
       player: admin._id,
+      roll: -1,
+      pieces: 4,
     };
 
     const newRoom = new this.roomModel({
@@ -39,6 +42,7 @@ export class RoomService {
       password: await this.generateHash(room.password),
       playerList: [player],
       turn: -1,
+      sorted: false,
     });
 
     await newRoom.save();
@@ -73,6 +77,8 @@ export class RoomService {
     const player: Player = {
       finished: false,
       player: user._id,
+      roll: -1,
+      pieces: 4,
     };
 
     if (room.password && !(await bcrypt.compare(password, room.password)))
@@ -130,7 +136,6 @@ export class RoomService {
 
   public async startGame(roomId: string, userId: string): Promise<Room> {
     const room = await this.roomModel.findById(roomId);
-    const user = await this.userModel.findById(userId);
 
     room.turn = 0;
     for (let i = 0; i < room.playerList.length; i++) {
@@ -150,18 +155,27 @@ export class RoomService {
     return await this.dtoFunctions.roomToDTO(room);
   }
 
-  /*public async guess(
+  public async getFinished(roomId: string): Promise<number> {
+    const room = await this.roomModel.findById(roomId);
+
+    return room.playerList.filter((player: Player) => player.finished).length;
+  }
+
+  public async updateTurn(
     roomId: string,
+    home: number,
     userId: string,
-    guess: string,
-    points: number,
-  ): Promise<[number, User]> {
+  ): Promise<Room> {
     const room = await this.roomModel.findById(roomId);
     const user = await this.userModel.findById(userId);
-    let guessed = 0;
 
-    if (guess.toLowerCase() !== room.currentWord.toLowerCase())
-      return [0, this.dtoFunctions.userToDTO(user)];
+    ++room.turn;
+    room.turn = room.turn % room.playerList.length;
+
+    while (room.playerList[room.turn].finished) {
+      ++room.turn;
+      room.turn = room.turn % room.playerList.length;
+    }
 
     const index = room.playerList.indexOf(
       room.playerList.find(
@@ -169,66 +183,62 @@ export class RoomService {
       ),
     );
 
-    const drawerIndex = room.playerList.indexOf(
+    if (index > -1 && home === -1) {
+      --room.playerList[index].pieces;
+
+      if (room.playerList[index].pieces === 0) {
+        const position = await this.getFinished(room.id);
+        room.playerList[index].finished = true;
+        user.results[position]
+          ? ++user.results[position]
+          : (user.results[position] = 1);
+
+        await user.save();
+      }
+
+      room.markModified('playerList');
+    }
+
+    await room.save();
+
+    return await this.dtoFunctions.roomToDTO(room);
+  }
+
+  public async rollDice(roomId: string, userId: string): Promise<RoomRoll> {
+    const room = await this.roomModel.findById(roomId);
+    const user = await this.userModel.findById(userId);
+
+    const index = room.playerList.indexOf(
       room.playerList.find(
-        (player: Player) => room.drawer.toString() === player.player.toString(),
+        (player: Player) => user.id === player.player.toString(),
       ),
     );
 
-    if (index > -1 && !room.playerList[index].guessed) {
-      const player = await this.userModel.findById(
-        room.playerList[index].player.toString(),
-      );
-      const drawer = await this.userModel.findById(room.drawer.toString());
-      room.playerList[index].points += points;
-      player.cumulativePoints += points;
-      drawer.cumulativePoints += Math.floor(points / 2);
-      room.playerList[index].guessed = true;
-      room.playerList[drawerIndex].points += Math.floor(points / 2);
+    if (index > -1) {
+      room.playerList[index].roll = this.randomIntFromInterval(1, 6);
+
+      if (!room.sorted) {
+        ++room.turn;
+        room.turn = room.turn % room.playerList.length;
+
+        if (!room.playerList.find((player: Player) => player.roll === -1)) {
+          room.playerList.sort((player1: Player, player2: Player) =>
+            player1.roll > player2.roll ? -1 : 1,
+          );
+          room.turn = 0;
+          room.sorted = true;
+        }
+      }
 
       room.markModified('playerList');
-      await player.save();
       await room.save();
     }
 
-    for (let i = 0; i < room.playerList.length; i++) {
-      if (room.playerList[i].guessed) ++guessed;
-    }
-
-    return [
-      guessed === room.playerList.length - 1 ? 2 : 1,
-      this.dtoFunctions.userToDTO(user),
-    ];
+    return this.dtoFunctions.roomRollToDto(
+      await this.dtoFunctions.roomToDTO(room),
+      room.playerList[index].roll,
+    );
   }
-
-  public async updateGame(roomId: string): Promise<boolean> {
-    const room = await this.roomModel.findById(roomId);
-    ++room.rounds;
-
-    if (room.rounds === room.playerList.length) {
-      room.drawer = null;
-      room.currentWord = null;
-      room.playerList = room.playerList.sort((a, b) => b.points - a.points);
-      const player = await this.userModel.findById(
-        room.playerList[0].player.toString(),
-      );
-      ++player.wins;
-
-      await player.save();
-      await room.save();
-
-      return false;
-    }
-
-    room.drawer = room.playerList[room.rounds].player;
-    for (let i = 0; i < room.playerList.length; i++) {
-      room.playerList[i].guessed = false;
-    }
-
-    room.markModified('playerList');
-    await room.save();
-    return true;
-  }*/
 
   private async generateHash(password: string): Promise<string> {
     if (password === '') return '';
@@ -237,5 +247,9 @@ export class RoomService {
     const hash = await bcrypt.hash(password, salt);
 
     return hash;
+  }
+
+  private randomIntFromInterval(min: number, max: number) {
+    return Math.floor(Math.random() * (max - min + 1) + min);
   }
 }

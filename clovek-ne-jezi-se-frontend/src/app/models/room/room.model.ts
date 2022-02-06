@@ -7,4 +7,5 @@ export class RoomDTO {
   password?: string | undefined | null = null;
   playerList?: Array<PlayerDTO> | undefined | null = null;
   turn?: number | undefined | null = null;
+  sorted?: boolean | undefined | null = null;
 }

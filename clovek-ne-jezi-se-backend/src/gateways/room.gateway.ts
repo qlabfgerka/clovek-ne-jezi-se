@@ -93,14 +93,27 @@ export class RoomGateway
     }
   }
 
-  @SubscribeMessage('draw')
-  public handleDraw(
+  @SubscribeMessage('board')
+  public handleBoard(
     _client: Socket,
-    data: { roomId: string; drawing: string; seconds: number },
+    data: {
+      roomId: string;
+      child: string;
+      oldParent: string;
+      newParent: string;
+      home: string;
+      eaten: string;
+      userId: string;
+    },
   ): void {
-    this.socketService.server
-      .to(data.roomId)
-      .emit('drawingChanged', { drawing: data.drawing, seconds: data.seconds });
+    this.socketService.server.to(data.roomId).emit('boardChanged', {
+      child: data.child,
+      oldParent: data.oldParent,
+      newParent: data.newParent,
+      home: data.home,
+      eaten: data.eaten,
+      userId: data.userId,
+    });
   }
 
   @SubscribeMessage('help')

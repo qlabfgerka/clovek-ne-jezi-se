@@ -23,6 +23,9 @@ export class Room {
 
   @Prop()
   turn: number;
+
+  @Prop()
+  sorted: boolean;
 }
 
 export const RoomSchema = SchemaFactory.createForClass(Room);

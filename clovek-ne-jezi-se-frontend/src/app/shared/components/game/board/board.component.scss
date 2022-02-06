@@ -3,6 +3,7 @@
   height: 4rem;
   display: flex;
   align-items: center;
+  position: relative;
 }
 
 .tile:not(.board) {
@@ -26,11 +27,13 @@
 }
 
 .piece {
+  display: flex;
+  left: 0.8rem;
   width: 2rem;
   height: 2rem;
-  margin: 0 auto;
   filter: brightness(50%);
   border: 3px solid black;
+  position: absolute;
 }
 
 .p1 {
