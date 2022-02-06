@@ -189,9 +189,9 @@ export class RoomService {
       if (room.playerList[index].pieces === 0) {
         const position = await this.getFinished(room.id);
         room.playerList[index].finished = true;
-        user.results[position - 1]
-          ? ++user.results[position - 1]
-          : (user.results[position - 1] = 1);
+        user.results[position]
+          ? ++user.results[position]
+          : (user.results[position] = 1);
 
         await user.save();
       }

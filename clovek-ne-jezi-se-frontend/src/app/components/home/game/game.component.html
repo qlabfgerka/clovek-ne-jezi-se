@@ -15,12 +15,15 @@
           mat-cell
           *matCellDef="let element"
           class="turn center-text"
-          [ngClass]="{ turn: element.player.nickname === playerNickname }"
+          [ngClass]="{
+            turn: element.player.nickname === playerNickname,
+            shaker: element.finished
+          }"
         >
           {{ element.player.nickname }}
         </td>
       </ng-container>
-      
+
       <ng-container matColumnDef="pieces">
         <th mat-header-cell *matHeaderCellDef class="center-text">
           Pieces left
@@ -29,7 +32,10 @@
           mat-cell
           *matCellDef="let element"
           class="turn center-text"
-          [ngClass]="{ turn: element.player.nickname === playerNickname }"
+          [ngClass]="{
+            turn: element.player.nickname === playerNickname,
+            shaker: element.finished
+          }"
         >
           {{ element.pieces }}
         </td>

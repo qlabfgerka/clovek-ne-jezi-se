@@ -1,4 +1,4 @@
-import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { MatTableDataSource } from '@angular/material/table';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -55,6 +55,7 @@ export class GameComponent implements OnInit {
       (data: { room: RoomDTO; roll: number }) => {
         this.room = data.room;
         this.roll = data.roll;
+        this.dataSource = new MatTableDataSource(this.room.playerList!);
 
         this.dataService.setAll(
           `p${this.playerNumber}`,
@@ -77,7 +78,10 @@ export class GameComponent implements OnInit {
         if (data.child && data.oldParent && this.getUserID !== data.userId)
           this.board.update(data.child, data.oldParent, data.newParent);
 
-        if (data.home) this.board.update(data.eaten, data.newParent, data.home);
+        if (data.home) {
+          this.playVictorySound();
+          this.board.update(data.eaten, data.newParent, data.home);
+        }
       }
     );
 
@@ -113,6 +117,7 @@ export class GameComponent implements OnInit {
   }
 
   public rollDice(): void {
+    this.playDiceSound();
     if (this.room.sorted) {
       this.rolled = true;
       this.turnEndable = true;
@@ -158,5 +163,17 @@ export class GameComponent implements OnInit {
         this.room = room;
         this.dataSource = new MatTableDataSource(this.room.playerList!);
       });
+  }
+
+  private playDiceSound(): void {
+    const audio = new Audio('assets/sounds/dice.mp3');
+    audio.load();
+    audio.play();
+  }
+
+  private playVictorySound(): void {
+    const audio = new Audio('assets/sounds/victory.wav');
+    audio.load();
+    audio.play();
   }
 }
