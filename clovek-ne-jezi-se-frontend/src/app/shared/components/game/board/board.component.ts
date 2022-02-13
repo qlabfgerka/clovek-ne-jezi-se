@@ -95,6 +95,11 @@ export class BoardComponent implements OnInit {
       );
       div.appendChild(child);
     } else {
+      if (this.checkHome(childClasses[1], +parentClasses[2], roll) === '') {
+        this.dataService.setNewParent(undefined);
+        this.moveEvent.emit(-1);
+        return;
+      }
       div = document.getElementsByClassName(
         `tile board ${this.checkHome(childClasses[1], +parentClasses[2], roll)}`
       )[0];
@@ -118,17 +123,15 @@ export class BoardComponent implements OnInit {
   private checkHome(player: string, position: number, roll: number): string {
     const next: number = position + roll;
     if (player === 'p1' && next > 22 && position <= 22)
-      return `${player}w${next % 22}`;
+      return next % 22 > 4 ? '' : `${player}w${next % 22}`;
     else if (player === 'p2' && next > 2 && position <= 2)
-      return `${player}w${(40 + next) % 42}`;
+      return (40 + next) % 42 > 4 ? '' : `${player}w${(40 + next) % 42}`;
     else if (player === 'p2' && next > 42 && position <= 39)
-      return `${player}w${next % 42}`;
-    else if (player === 'p2' && next <= 42 && position <= 39)
-      return `${player}w${next % 40}`;
+      return next % 42 > 4 ? '' : `${player}w${next % 42}`;
     else if (player === 'p3' && next > 32 && position <= 32)
-      return `${player}w${next % 32}`;
+      return next % 32 > 4 ? '' : `${player}w${next % 32}`;
     else if (player === 'p4' && next > 12 && position <= 12)
-      return `${player}w${next % 12}`;
+      return next % 12 > 4 ? '' : `${player}w${next % 12}`;
     return `${next % 40}`;
   }
 
